@@ -14,17 +14,31 @@ contract SimpleSwap {
     }
 
     function performSwap(address pool) public {
-        uint256 wethAmount = IERC20(weth).balanceOf(address(this));
+        // Use a very small fraction of WETH for the swap to ensure liquidity
+        uint256 wethAmount = IERC20(weth).balanceOf(address(this)) / 10000;
 
         // Approve the pool to spend WETH
         IERC20(weth).approve(pool, wethAmount);
 
         // Get the reserves of the pool
         (uint112 reserve0, uint112 reserve1,) = IUniswapV2Pair(pool).getReserves();
-        (address token0, ) = IUniswapV2Pair(pool).token0() == weth ? (weth, usdc) : (usdc, weth);
+        address token0 = IUniswapV2Pair(pool).token0();
+
+        // Ensure weth and usdc are in the correct order
+        if (token0 == usdc) {
+            (reserve0, reserve1) = (reserve1, reserve0);
+        }
+
+        // Log the reserves and swap amounts
+        console.log("WETH amount:", wethAmount);
+        console.log("Reserve0 (USDC):", reserve0);
+        console.log("Reserve1 (WETH):", reserve1);
 
         // Calculate the amount of USDC to receive
-        uint256 amountOut = getAmountOut(wethAmount, reserve0, reserve1);
+        uint256 amountOut = getAmountOut(wethAmount, reserve1, reserve0);
+
+        // Log the calculated amountOut
+        console.log("Calculated amountOut (USDC):", amountOut);
 
         // Perform the swap
         IUniswapV2Pair(pool).swap(

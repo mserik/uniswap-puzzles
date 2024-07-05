@@ -21,9 +21,21 @@ contract SimpleSwapTest is Test {
 
     function test_PerformSwap() public {
         vm.prank(address(0xb0b));
+
+        uint256 initialWETHBalance = IERC20(weth).balanceOf(address(simpleSwap));
+        uint256 initialUSDCBalance = IERC20(usdc).balanceOf(address(simpleSwap));
+
+        console2.log("Initial WETH balance:", initialWETHBalance);
+        console2.log("Initial USDC balance:", initialUSDCBalance);
+
         simpleSwap.performSwap(pool);
 
-        uint256 usdcBal = IERC20(usdc).balanceOf(address(simpleSwap));
-        require(usdcBal > 0, "Swap failed, USDC balance is 0");
+        uint256 finalWETHBalance = IERC20(weth).balanceOf(address(simpleSwap));
+        uint256 finalUSDCBalance = IERC20(usdc).balanceOf(address(simpleSwap));
+
+        console2.log("Final WETH balance:", finalWETHBalance);
+        console2.log("Final USDC balance:", finalUSDCBalance);
+
+        require(finalUSDCBalance > 0, "Swap failed, USDC balance is 0");
     }
 }
